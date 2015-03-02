@@ -104,17 +104,17 @@ class AuthManager(object):
                 break
         return message, status
 
-    def check_auto_registration(self, trans, email, password, debug=False):
+    def check_auto_registration(self, trans, email, password): # , debug=False
         """
         Checks the email/password using auth providers in order. If a match is
         found, returns the 'auto-register' option for that provider.
         """
-        for provider, options in self.active_authenticators(email, password, debug):
+        for provider, options in self.active_authenticators(email, password):
             if provider is None:
-                if debug:
+                if self.debug:
                     log.debug( "Unable to find module: %s" % options )
             else:
-                auth_result, auto_username = provider.authenticate(email, password, options, debug)
+                auth_result, auto_username = provider.authenticate(email, password, options, self.debug)
                 auto_username = str(auto_username).lower()
                 if auth_result is True:
                     # make username unique
@@ -127,7 +127,7 @@ class AuthManager(object):
                             i += 1
                         else:
                             break  # end for loop if we can't make a unique username
-                    if debug:
+                    if self.debug:
                         log.debug( "Email: %s, auto-register with username: %s" % (email, auto_username) )
                     return (_get_bool(options, 'auto-register', False), auto_username)
                 elif auth_result is None:
